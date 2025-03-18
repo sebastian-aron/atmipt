@@ -1,0 +1,34 @@
+﻿@{
+    ViewBag.Title = "Create Account";
+}
+
+<h2>Create Account</h2>
+
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}
+
+<form method="post">
+    <div class="form-group">
+        <label for="userName">Name:</label>
+        <input type="text" id="userName" name="userName" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="passcode">Passcode:</label>
+        <input type="password" id="passcode" name="passcode" class="form-control" required minlength="4" maxlength="6" />
+    </div>
+    <div class="form-group">
+        <label for="bankName">Bank Name:</label>
+        <select id="bankName" name="bankName" class="form-control" required>
+            <option value="">Select Bank</option>
+            <option value="BDO">BDO</option>
+            <option value="China Bank">China Bank</option>
+            <option value="PNB">PNB</option>
+            <option value="LandBank">LandBank</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Account</button>
+</form>
+
+<a href="@Url.Action("Index", "Home")">Back to Login</a>

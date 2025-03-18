@@ -1,0 +1,440 @@
+﻿@{
+    ViewBag.Title = "Withdraw Cash";
+    string bankColor = "#222";
+
+    var bankColors = new Dictionary<string, string>
+    {
+         { "BDO", "#0033A0" },
+        { "China Bank", "#D71A28" },
+        { "PNB", "#004990" },
+        { "LandBank", "#008000" },
+        { "BPI", "#8B0000" },
+        { "Visa", "#1A1F71" },
+        { "Mastercard", "#222" },
+        { "American Express", "#007BFF" }
+    };
+
+    if (ViewBag.BankName != null && bankColors.ContainsKey(ViewBag.BankName))
+    {
+        bankColor = bankColors[ViewBag.BankName];
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .atm-container {
+            width: 800px;
+            height: 800px; /* Increased height */
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .atm-screen {
+            background-color: @bankColor;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+            .atm-screen h2 {
+                font-weight: bold;
+                font-size: 35px;
+            }
+
+            .atm-screen p {
+                font-size: 18px;
+            }
+        .form-group {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid @bankColor;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .atm-button {
+            background-color: @bankColor;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+            .atm-button:hover {
+                opacity: 0.8;
+            }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .quick-amount {
+            background-color: white;
+            color: @bankColor;
+            padding: 10px;
+            border: 2px solid @bankColor;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+            .quick-amount:hover {
+                opacity: 0.8;
+            }
+
+        .back-button {
+            border: 2px solid @bankColor;
+            background-color: transparent;
+            color: @bankColor;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-left: 5px;
+            width: auto;
+        }
+
+        .menu-button {
+            display: block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: @bankColor;
+            font-weight: bold;
+        }
+
+
+        /* Ensure the receipt is properly placed */
+        .receipt-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Ensure the receipt and buttons fit properly */
+        .receipt-container {
+            width: 100%; /* Take full width */
+            max-width: 350px; /* Limit width for readability */
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        /* Ensure the Done button stays properly positioned */
+        .done-button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .done-button {
+            display: inline-block;
+            width: 80%; /* Adjust width to fit */
+            padding: 10px;
+            background-color: #222;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+            .done-button:hover {
+                background-color: #444;
+            }
+        /* HEADER */
+        .receipt-header h2 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .receipt-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* TABLE */
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+            .receipt-table td {
+                padding: 8px;
+                font-size: 14px;
+                border-bottom: 1px dashed #ddd;
+            }
+
+                .receipt-table td:first-child {
+                    font-weight: bold;
+                    text-align: left;
+                    width: 50%;
+                }
+
+                .receipt-table td:last-child {
+                    text-align: right;
+                }
+
+        /* DATE */
+        .receipt-date {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* THANK YOU MESSAGE */
+        .receipt-thankyou {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        /* DONE BUTTON */
+        .done-button {
+            flex: 1;
+            max-width: 140px;
+            padding: 8px 12px;
+            border: 2px solid @bankColor;
+            background-color: transparent;
+            color: @bankColor;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            white-space: nowrap;
+        }
+
+            .done-button:hover {
+                background-color: whitesmoke;
+            }
+
+        .receipt-container hr {
+            margin: 10px 0;
+            border: 0.5px solid #eee;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none; 
+        }
+
+            .notification.success { 
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .notification.error { 
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+
+        input[type="number"] {
+            appearance: textfield;
+        }
+    </style>
+    <script>
+        function selectAmount(amount) {
+            document.getElementById('withdrawAmount').value = amount;
+        }
+    </script>
+    </head>
+<body>
+    <div class="d-flex justify-content-center">
+        <div class="atm-container">
+            <div class="atm-screen">
+                <pre></pre>
+                <h2>@ViewBag.BankName ATM</h2>
+                <p>Withdraw Cash</p>
+            </div>
+            @if (ViewBag.ShowReceipt != null && ViewBag.ShowReceipt)
+            {
+                var receiptData = TempData["ReceiptData"] as dynamic;
+                <div class="receipt-wrapper">
+                    <div id="receiptContent" class="receipt-container">
+                        <div class="receipt-header">
+                            <h2>@receiptData.BankName</h2>
+                            <p class="receipt-title">Transaction Receipt</p>
+                        </div>
+                        <hr />
+                        <table class="receipt-table">
+                            <tr>
+                                <td>Name:</td>
+                                <td>@receiptData.UserName</td>
+                            </tr>
+                            <tr>
+                                <td>Account No:</td>
+                             
+                                <td>
+                                    @{
+                                        string maskedAccountNumber = "****" + receiptData.AccountNumber.Substring(receiptData.AccountNumber.Length - 4);
+                                    }
+                                    @maskedAccountNumber
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Transaction Type:</td>
+                                <td>@receiptData.TransactionType</td>
+                            </tr>
+                            <tr>
+                                <td>Withdrawn Amount:</td>
+                                <td>₱@receiptData.Amount.ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td>Transaction Fee:</td>
+                                <td>₱15.00</td>
+                            </tr>
+                            <tr>
+                                <td><b>Total Deduction:</b></td>
+                                <td><b>₱@(receiptData.Amount + 15)</b></td>
+                            </tr>
+                            <tr>
+                                <td><b>Remaining Balance:</b></td>
+                                <td><b>₱@receiptData.Balance.ToString("N2")</b></td>
+                            </tr>
+                        </table>
+                        <hr />
+                        <p class="receipt-date">Date: @receiptData.Date.ToString("MMMM dd, yyyy HH:mm:ss")</p>
+                        <p class="receipt-thankyou">Thank you for banking with us!</p>
+                    </div>
+
+                    <div class="done-button-container">
+                        <button onclick="downloadReceiptPDF()" class="done-button">print receipt</button>
+                        <a href="@Url.Action("Index", "Home")" class="done-button">eject card</a>
+                    </div>
+                </div>
+
+
+            }
+            else
+            {
+                <form id="withdrawalForm" action="@Url.Action("Withdraw", "Home")" method="post">
+                    <input type="hidden" name="bank" value="@ViewBag.BankName" />
+                    <div class="quick-amounts">
+                        <button type="button" class="quick-amount" onclick="selectAmount(500)">₱500</button>
+                        <button type="button" class="quick-amount" onclick="selectAmount(1000)">₱1000</button>
+                        <button type="button" class="quick-amount" onclick="selectAmount(10000)">₱2000</button>
+                        <button type="button" class="quick-amount" onclick="selectAmount(500)">₱5000</button>
+                        <button type="button" class="quick-amount" onclick="selectAmount(1000)">₱700</button>
+                        <button type="button" class="quick-amount" onclick="selectAmount(10000)">₱10000</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Enter Custom Amount:</label>
+                        <input type="number" name="amount" id="withdrawAmount" min="1" class="form-control" required />
+                    </div>
+                    <button type="submit" class="atm-button">Proceed</button>
+                    <a href="@Url.Action("MainMenu", "Home", new { bank = ViewBag.BankName })" class="menu-button">← Back to Menu</a>
+                </form>
+            }
+            @if (ViewBag.Message != null)
+            {
+                <div class="notification @(ViewBag.Message.ToString().Contains("successful") ? "success" : "error")" id="notification">
+                    @ViewBag.Message
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var notification = document.getElementById('notification');
+                        notification.style.display = 'block';
+                        setTimeout(function () {
+                            notification.style.display = 'none';
+                    @if (ViewBag.Message.ToString().Contains("Insufficient"))
+                    {
+                        @:window.location.href = '@Url.Action("Index", "Home")';
+                    }
+                                            }, 3000); // Hide after 3 seconds
+                    });
+                </script>
+
+               
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+                <script>
+                    async function downloadReceiptPDF() {
+                        const { jsPDF } = window.jspdf;
+                        const receipt = document.getElementById('receiptContent');
+
+                      
+                        receipt.style.height = "auto";
+                        receipt.style.overflow = "visible";
+
+                        html2canvas(receipt, {
+                            scale: 3,
+                            useCORS: true,
+                            scrollY: 0, 
+                            windowHeight: receipt.scrollHeight 
+                        }).then(canvas => {
+                            const imgData = canvas.toDataURL("image/png");
+                            const pdf = new jsPDF('p', 'mm', 'legal'); 
+                            const imgWidth = 190;
+                            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                            pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                            pdf.save("Transaction_Receipt.pdf");
+
+                          
+                            receipt.style.height = "";
+                            receipt.style.overflow = "";
+                        });
+                    }
+                </script>
+            }
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
