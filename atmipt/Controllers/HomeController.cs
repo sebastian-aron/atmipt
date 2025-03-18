@@ -271,27 +271,30 @@ namespace atmipt.Controllers
             string userName = HttpContext.Session.GetString("UserName");
             string accountNumber = HttpContext.Session.GetString("AccountNumber");
 
+            const decimal transactionFee = 15m; // Define the transaction fee
+
             if (accountId == 0)
             {
                 return RedirectToAction("Index");
             }
 
-            if (amount <= 0) 
+            if (amount <= 0)
             {
                 ViewBag.Message = "Please enter a valid amount.";
                 ViewBag.BankName = HttpContext.Session.GetString("BankName");
                 return View();
             }
 
-            if (amount % 100 != 0) 
+            if (amount % 100 != 0)
             {
                 ViewBag.Message = "Please enter a valid amount.";
                 ViewBag.BankName = HttpContext.Session.GetString("BankName");
                 return View();
             }
-            if (amount  > 10000)
+
+            if (amount > 10000)
             {
-                ViewBag.Message = "you can only 10,000 per transaction";
+                ViewBag.Message = "You can only withdraw up to ?10,000 per transaction.";
                 ViewBag.BankName = HttpContext.Session.GetString("BankName");
                 return View();
             }
@@ -317,15 +320,20 @@ namespace atmipt.Controllers
                         }
                     }
 
-                    if (currentBalance >= amount)
+                    decimal totalDeduction = amount + transactionFee; // Withdrawal amount + fee
+
+                    if (currentBalance >= totalDeduction)
                     {
-                        string updateQuery = "UPDATE BankAccounts SET Balance = Balance - @amount WHERE Id = @accountId";
+                        // Deduct both withdrawal amount and transaction fee
+                        string updateQuery = "UPDATE BankAccounts SET Balance = Balance - @totalDeduction WHERE Id = @accountId";
                         using (MySqlCommand updateCmd = new MySqlCommand(updateQuery, conn, transaction))
                         {
                             updateCmd.Parameters.AddWithValue("@accountId", accountId);
-                            updateCmd.Parameters.AddWithValue("@amount", amount);
+                            updateCmd.Parameters.AddWithValue("@totalDeduction", totalDeduction);
                             updateCmd.ExecuteNonQuery();
                         }
+
+                        // Log withdrawal transaction
                         string logQuery = "INSERT INTO Transactions (AccountId, Type, Amount, Date) VALUES (@accountId, 'Withdraw', @amount, NOW())";
                         using (MySqlCommand logCmd = new MySqlCommand(logQuery, conn, transaction))
                         {
@@ -334,22 +342,33 @@ namespace atmipt.Controllers
                             logCmd.ExecuteNonQuery();
                         }
 
+                        // Log transaction fee
+                        string feeLogQuery = "INSERT INTO Transactions (AccountId, Type, Amount, Date) VALUES (@accountId, 'Transaction Fee', @feeAmount, NOW())";
+                        using (MySqlCommand feeLogCmd = new MySqlCommand(feeLogQuery, conn, transaction))
+                        {
+                            feeLogCmd.Parameters.AddWithValue("@accountId", accountId);
+                            feeLogCmd.Parameters.AddWithValue("@feeAmount", transactionFee);
+                            feeLogCmd.ExecuteNonQuery();
+                        }
+
                         transaction.Commit();
+
                         var receiptData = new
                         {
-                            Balance = currentBalance - amount,
+                            Balance = currentBalance - totalDeduction,
                             BankName = bank,
                             UserName = userName,
                             AccountNumber = accountNumber,
                             AccountId = accountId,
                             TransactionType = "Withdrawal",
                             Amount = amount,
+                            Fee = transactionFee, // Add transaction fee to the receipt
                             Date = DateTime.Now
                         };
 
                         TempData["ReceiptData"] = receiptData;
                         ViewBag.ShowReceipt = true;
-                        ViewBag.Message = "Withdrawal successful! Please take your card.";
+                        ViewBag.Message = "Withdrawal successful! ?15 transaction fee applied.";
                     }
                     else
                     {
